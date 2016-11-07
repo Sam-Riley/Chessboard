@@ -22,9 +22,16 @@ export default class BitBoard{
 
 	isBitSet(bit){
 		if(bit > 31)
-			return ((this.high & (1<<(bit-1)-32))>>>0) > 0;
+			return ((this.high & (1<<((bit-32))))>>>0) > 0;
 		else
 			return ((this.low & (1<<(bit-1)))>>>0) > 0;
+	}
+
+	getBit(bit){
+		if(bit > 31)
+			return (1<<(bit-32))>>>0;
+		else
+			return (1<<(bit-1)) >>>0;
 	}
 
 	shift_left(n){
@@ -37,5 +44,33 @@ export default class BitBoard{
 
 		else
 			return new BitBoard(((this.high << n) | (this.low >>> (32-n))) >>> 0, (this.low << n) >>> 0);
+	}
+
+	shift_right(n){
+		n >>>= 0;
+
+		if(n > 31)
+			return new BitBoard(0, this.high >>> (n - 32));
+		else if (n > 0)
+			return new BitBoard(this.high >>> n,((this.low >>> n) | (this.high << (32-n))) >>> 0);
+
+		return new BitBoard(this.high, this.low);
+
+	}
+
+	or(bitBoard){
+		return new BitBoard((this.high | bitBoard.high) >>> 0, (this.low | bitBoard.low) >>> 0);
+	}
+
+	xor(bitBoard){
+		return new BitBoard((this.high ^ bitBoard.high) >>> 0, (this.low ^ bitBoard.low) >>> 0);
+	}
+
+	and(bitBoard){
+		return new BitBoard((this.high & bitBoard.high) >>> 0, (this.low & bitBoard.low) >>> 0);
+	}
+
+	not(){
+		return new BitBoard(~this.high>>>0, ~this.low>>>0);
 	}
 }
