@@ -14,7 +14,7 @@ export default class PlayingBoard extends Component {
 
 		return (
 			<div key={index} style={{ width: (600 / 8), height: (600 / 8)}}>
-				<Square clickHandler={()=>{}} index={index} black={black}>
+				<Square piece={this.board.getPiece(index)} index={index} black={black}>
 					{this.board.getPiece(index) >= 0 ? this.board.getPiece(index) : null}
 				</Square>
 			</div>
