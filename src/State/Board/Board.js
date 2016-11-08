@@ -81,7 +81,7 @@ export default class Board {
 	getPiece(index){
 		let boards = [...this.whiteBitBoards, ...this.blackBitBoards];
 		for(let i = 0; i < boards.length; ++i)
-			if(boards[i].isBitSet(index))
+			if(boards[i].isBitSet(63-index))
 				return i;
 
 		return -1;

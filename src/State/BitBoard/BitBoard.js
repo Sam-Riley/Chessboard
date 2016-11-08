@@ -24,14 +24,14 @@ export default class BitBoard{
 		if(bit > 31)
 			return ((this.high & (1<<((bit-32))))>>>0) > 0;
 		else
-			return ((this.low & (1<<(bit-1)))>>>0) > 0;
+			return ((this.low & (1<<(bit)))>>>0) > 0;
 	}
 
 	getBit(bit){
 		if(bit > 31)
 			return (1<<(bit-32))>>>0;
 		else
-			return (1<<(bit-1)) >>>0;
+			return (1<<(bit)) >>>0;
 	}
 
 	shift_left(n){

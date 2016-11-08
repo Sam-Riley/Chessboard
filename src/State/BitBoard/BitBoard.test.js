@@ -26,7 +26,7 @@ it("Checks to see if a specific bit in the lower bitfield of a BitBoard is set",
 	let whiteRook = new BitBoard(0,129);
 	let whitePawn = new BitBoard(0,65280);
 
-	expect(whiteRook.isBitSet(8)).toEqual(true)
+	expect(whiteRook.isBitSet(7)).toEqual(true)
 	expect(whiteRook.isBitSet(2)).toEqual(false);
 
 })

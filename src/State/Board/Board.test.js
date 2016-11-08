@@ -32,11 +32,11 @@ it("Gets Rank 8", ()=>{
 })
 
 it("Gets the specific piece at an index in lower bitfield", ()=>{
-	expect(board.getPiece(1)).toEqual(1);
+	expect(board.getPiece(1)).toEqual(8);
 	expect(board.getPiece(27)).toEqual(-1);
 })
 
 it("Gets the specific piece at an index in upper bitfield", ()=>{
-	expect(board.getPiece(63)).toEqual(7);
+	expect(board.getPiece(63)).toEqual(1);
 	expect(board.getPiece(40)).toEqual(-1);
 })
