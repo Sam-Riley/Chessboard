@@ -9,12 +9,16 @@ export default class PlayingBoard extends Component {
 		this.board = new Board();
 	}
 
+	generateMoves(index){
+		console.log(index);
+	}
+
 	renderSquare(index){
 		const black = ((index % 8) + Math.floor(index/8)) % 2 === 0;
 
 		return (
 			<div key={index} style={{ width: (600 / 8), height: (600 / 8)}}>
-				<Square piece={this.board.getPiece(index)} index={index} black={black}>
+				<Square clickHandler={this.generateMoves.bind(this)}piece={this.board.getPiece(index)} index={index} black={black}>
 					{this.board.getPiece(index) >= 0 ? this.board.getPiece(index) : null}
 				</Square>
 			</div>

@@ -22,9 +22,16 @@ export default class BitBoard{
 
 	isBitSet(bit){
 		if(bit > 31)
-			return ((this.high & (1<<((bit-32))))>>>0) > 0;
+			return ((this.high & (1<<(bit-32)))>>>0) > 0;
 		else
 			return ((this.low & (1<<(bit)))>>>0) > 0;
+	}
+
+	setBit(bit){
+		if(bit > 31)
+			return new BitBoard((this.high|((1<<(bit-32)) >>> 0)), this.low)
+		else
+			return new BitBoard(this.high, (this.low | ((1 << (bit-32)) >>> 0)))
 	}
 
 	getBit(bit){

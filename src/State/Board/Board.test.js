@@ -40,3 +40,20 @@ it("Gets the specific piece at an index in upper bitfield", ()=>{
 	expect(board.getPiece(63)).toEqual(1);
 	expect(board.getPiece(40)).toEqual(-1);
 })
+
+//generate moves
+it("Generates possible moves for a pawn in its starting position", ()=>{
+	let pawn = new BitBoard(0,256)
+	expect(board.generateWhitePawnMoves([pawn, new BitBoard(0,0), pawn], 8)).toEqual(new BitBoard(0,16842752));
+})
+
+it("Generates possible moves for a pawn that is not in its original spot", ()=>{
+	let pawn = new BitBoard(0,65536);
+	expect(board.generateWhitePawnMoves([pawn, new BitBoard(0,0), pawn],16)).toEqual(new BitBoard(0,16777216))
+})
+
+it("Generates possible moves for a pawn that is behind a friendly piece", ()=>{
+	let pawn = new BitBoard(0,256);
+	expect(board.generateWhitePawnMoves([new BitBoard(0,65536), new BitBoard(0,0), pawn], 8)).toEqual(new BitBoard(0,0));
+})
+

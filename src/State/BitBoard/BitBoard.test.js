@@ -151,3 +151,34 @@ it("NOT's a board with both a high and low bitfield", ()=>{
 	let board = new BitBoard(1,1);
 	expect(board.not()).toEqual(new BitBoard(4294967294, 4294967294));
 })
+
+//set bits
+it("Set's a bit in the lower bitfield of an empty board", ()=>{
+	let board = new BitBoard(0,0);
+	expect(board.setBit(4)).toEqual(new BitBoard(0,16))
+})
+
+it("Set's a bit in the high bitfield of an empty board", ()=>{
+	let board = new BitBoard(0,0);
+	expect(board.setBit(32)).toEqual(new BitBoard(1,0))
+})
+
+it("Set's a bit in both high and low bitfield of an empty board", ()=>{
+	let board = new BitBoard(0,0);
+	expect(board.setBit(4).setBit(32)).toEqual(new BitBoard(1,16));
+})
+
+it("Set's a bit in lower when a bit is already set in lower bitfield", ()=>{
+	let board = new BitBoard(1,0);
+	expect(board.setBit(4)).toEqual(new BitBoard(1,16));
+})
+
+it("Set's a bit in upper bitfield with a bit set in the lower bitfield", ()=>{
+	let board = new BitBoard(0,1);
+	expect(board.setBit(32)).toEqual(new BitBoard(1,1));
+})
+
+it("Set's a bit in both upper and lower when neither bitfield is empty", ()=>{
+	let board = new BitBoard(1,1);
+	expect(board.setBit(33).setBit(1)).toEqual(new BitBoard(3,3));
+})
