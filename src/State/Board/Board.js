@@ -36,7 +36,7 @@ export default class Board {
 
 		// console.log(BitBoard.str2Bin([
 		// 	"00000001",
-		// 	"00000000",
+		// 	"00000011",
 		// 	"00000000",
 		// 	"00000000",
 		// 	].join("")));
@@ -130,11 +130,11 @@ export default class Board {
 		2. that pawnIndex is a number n such that 64 > n > 0
 
 	*/
-	generateWhitePawnMoves(bitBoards, pawnIndex){
-		let allPieces = bitBoards[0].or(bitBoards[1]);
-		
+	generateWhitePawnMoves(whiteOccupancy, blackOccupancy, whitePawns, pawnIndex){
+		let allPieces = whiteOccupancy.or(blackOccupancy);
+
 		//checking if pawn is valid
-		let pawn = bitBoards[2].and(new BitBoard(0,0).setBit(pawnIndex));
+		let pawn = whitePawns.and(new BitBoard(0,0).setBit(pawnIndex));
 
 		//single push
 		let singlePush = pawn.shift_left(8).and(allPieces.not());
@@ -142,13 +142,21 @@ export default class Board {
 
 		//double push Steps:
 		// 	1. Make sure pawn is in starting position
-			let pawnInRankTwo = pawn.and(this.getRankTwo());
+		let pawnInRankTwo = pawn.and(this.getRankTwo());
 		//	2. Make sure there is no piece in front of the pawn
-			let noBlockingPiece = pawn.shift_left(8).and(allPieces.not()).shift_left(8).and(allPieces.not());
+		let noBlockingPiece = pawn.shift_left(8).and(allPieces.not()).shift_left(8).and(allPieces.not());
 		
 		let doublePush = pawnInRankTwo.shift_left(16).and(noBlockingPiece)
+
+		//get captures:
+		//	1. set bit on pawnIndex + 9 (one up and one left) and not A File to make sure the target isnt off the left of the board
+			let leftTarget = pawn.shift_left(9).and(this.getAFile().not());
+		//	2. set bit on pawnIndex + 7 (one up and one right) and not file H (reason: see above)
+			let rightTarget = pawn.shift_left(7).and(this.getHFile().not());
+		// 	3. And above two possible captures with black pieces to make sure target is valid. 
+			let validTargets = leftTarget.or(rightTarget).and(blackOccupancy);
 		
 
-		return singlePush.or(doublePush);
+		return singlePush.or(doublePush).or(validTargets);
 	}
 }
