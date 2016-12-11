@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
+    "jsdoc": "^3.4.3",
     "react-scripts": "0.7.0"
   },
   "dependencies": {

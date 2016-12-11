@@ -35,8 +35,15 @@ export default class Board {
 		]
 
 		// console.log(BitBoard.str2Bin([
-		// 	"00000001",
-		// 	"00000011",
+		// 	"00000000",
+		// 	"00000000",
+		// 	"00000000",
+		// 	"00000000",
+		// 	].join("")));
+
+		// console.log(BitBoard.str2Bin([
+		// 	"00000000",
+		// 	"00000000",
 		// 	"00000000",
 		// 	"00000000",
 		// 	].join("")));
@@ -69,6 +76,9 @@ export default class Board {
 		return accumulator;
 	}
 
+	//check each bitboard to see which pieces are attacking this square.
+	getAttackingPieces(square){}
+
 	getAFile(){
 		return new BitBoard(2155905152, 2155905152);
 	}
@@ -98,65 +108,53 @@ export default class Board {
 	}
 
 	/*
-		Note, im going to leave a lot of comments along the way as I figure things out, or learn things
-		I'll clean them up in the final commit
+		@param allyPieces  : a bitboard of all places occupied by a particular pawns side
+		@param enemyPieces : a bitboard of all places occupied by a particular pawns enemy side
+		@param allyPawns   : a bitboard of all places occupied by friendly pawns
 
-		Attempt #1: it worked but i realized that it was very hard to test as it relied on internal state
-		as such I was unable to provide easy test cases. While fixable with hacks
-
-		such as calling the move generating function at a position occupied by another piece. The biggest
-		pitfall here is readability would likely be hindered
+		@returns : a bitboard containing all places that the pawn can move to
 	*/
-	// generateWhitePawnMoves(index){
-	// 	let pawn = new BitBoard();
-	// 	//single push
-	// 	let singlePush = pawn.setBit(index+8).and(this.getBlackPieces().not()).and(this.getWhitePieces().not());
-	// 	//double push
-	// 	let doublePush = pawn.setBit(index).and(this.getRankTwo()).shift_left(16).and(this.getWhitePieces().not()).and(this.getBlackPieces().not());
-
-	// 	return singlePush.or(doublePush);
-	// }
-
-	/*
-		Attempt #2: allons y!
-
-		first things first, this function is making a few assumptions. 
-
-		1. that bitBoards contain the following items:
-			1. a BitBoard containing all of the places occupied by white
-			2. a BitBoard containing all of the places occupied by black
-			3. a BitBoard comtaining all of the places occupied by white pawns
-
-		2. that pawnIndex is a number n such that 64 > n > 0
-
-	*/
-	generateWhitePawnMoves(whiteOccupancy, blackOccupancy, whitePawns, pawnIndex){
-		let allPieces = whiteOccupancy.or(blackOccupancy);
-
-		//checking if pawn is valid
-		let pawn = whitePawns.and(new BitBoard(0,0).setBit(pawnIndex));
-
-		//single push
+	generatePawnMoves(allyPieces, enemyPieces, allyPawns, pawnIndex){
+		let allPieces = allyPieces.or(enemyPieces);
+		let pawn = allyPawns.and(new BitBoard(0,0).setBit(pawnIndex));
 		let singlePush = pawn.shift_left(8).and(allPieces.not());
-		
-
-		//double push Steps:
-		// 	1. Make sure pawn is in starting position
 		let pawnInRankTwo = pawn.and(this.getRankTwo());
-		//	2. Make sure there is no piece in front of the pawn
 		let noBlockingPiece = pawn.shift_left(8).and(allPieces.not()).shift_left(8).and(allPieces.not());
-		
-		let doublePush = pawnInRankTwo.shift_left(16).and(noBlockingPiece)
-
-		//get captures:
-		//	1. set bit on pawnIndex + 9 (one up and one left) and not A File to make sure the target isnt off the left of the board
-			let leftTarget = pawn.shift_left(9).and(this.getAFile().not());
-		//	2. set bit on pawnIndex + 7 (one up and one right) and not file H (reason: see above)
-			let rightTarget = pawn.shift_left(7).and(this.getHFile().not());
-		// 	3. And above two possible captures with black pieces to make sure target is valid. 
-			let validTargets = leftTarget.or(rightTarget).and(blackOccupancy);
-		
+		let doublePush = pawnInRankTwo.shift_left(16).and(noBlockingPiece);
+		let leftTarget = pawn.shift_left(9).and(this.getAFile().not());
+		let rightTarget = pawn.shift_left(7).and(this.getHFile().not());
+		let validTargets = leftTarget.or(rightTarget).and(enemyPieces);
 
 		return singlePush.or(doublePush).or(validTargets);
 	}
+
+	/*
+		@param allyPieces  : a bitboard of all places occupied by a particular pawns side
+		@param enemyPieces : a bitboard of all places occupied by a particular pawns enemy side
+		@param allyPawns   : a bitboard of all places occupied by friendly pawns
+
+		@returns : a bitboard containing all places that the knight can move to
+	*/
+	generateKnightMoves(allyPieces, enemyPieces, allyKnights, knightIndex){
+		let allPieces = allyPieces.or(enemyPieces);
+		let knight = allyKnights.and(new BitBoard(0,0).setBit(knightIndex));
+
+		let topMoves = new BitBoard(0,0).setBit(knightIndex+17).setBit(knightIndex+15)
+		let leftMoves = new BitBoard(0,0).setBit(knightIndex+10).setBit(knightIndex-2)
+		let rightMoves = new BitBoard(0,0).setBit(knightIndex+10).setBit(knightIndex-6);
+		let bottomMoves = new BitBoard(0,0).setBit(knightIndex-17).setBit(knightIndex-15);
+
+		return topMoves.or(leftMoves).or(bottomMoves).or(rightMoves).and(allyPieces.not());
+	}
+
+	/*
+		@param allyPieces  : a bitboard of all places occupied by a particular pawns side
+		@param enemyPieces : a bitboard of all places occupied by a particular pawns enemy side
+		@param allyPawns   : a bitboard of all places occupied by friendly pawns
+
+		@returns : a bitboard containing all places that the king can move to
+	*/
+
+	//the biggest issue here will be making sure that there are no attackers in the movement square
+	generateKingMoves(allyPieces, enemyPieces, allyKnights, knightIndex){}
 }
