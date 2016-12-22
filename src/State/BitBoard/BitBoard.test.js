@@ -3,7 +3,7 @@ import BitBoard from './BitBoard.js';
 
 it("gets bits set", ()=>{
 	let bb = new BitBoard(0b10000000000000000000000000000001, 0b00000101010101010101010101010101)
-	expect(bb.getBitsSet()).toEqual([0,2,4,6,8,10,12,14,16,18,20,22,24,26, 32, 63]);
+	expect(bb.getSetBits()).toEqual([0,2,4,6,8,10,12,14,16,18,20,22,24,26, 32, 63]);
 })
 
 
@@ -283,17 +283,31 @@ it("Subtracts two bitboards", ()=>{
 it("Multiplies two bitboards", ()=>{
 	let bb = new BitBoard(1,9); //4294967305 
 	let bb2 = new BitBoard(0,3); // 3
-	expect(bb2.mult(bb)).toEqual(new BitBoard(3,27));
+	let expected = new BitBoard(3,27);
+
+	expect(bb2.mult(bb)).toEqual(expected);
 })
 
 it("Multiplies two bitboards", ()=>{
 	let bb = new BitBoard(0,2);                  
-	let bb2 = new BitBoard(0,2147483648);   
-	expect(bb.mult(bb2)).toEqual(new BitBoard(1,0));
+	let bb2 = new BitBoard(0,2147483648); 
+	let expected = new BitBoard(1,0);
+
+	expect(bb.mult(bb2)).toEqual(expected);
 })
 
 it("Multiplies two bitboards", ()=>{
 	let bb = new BitBoard(1,9); //4294967305 
 	let bb2 = new BitBoard(2,3); // 8589934595
+	let expected = new BitBoard(21,27)
+
 	expect(bb2.mult(bb)).toEqual(new BitBoard(21,27));
+})
+
+it("Multiplies two bitboards (rivalchess rook example)", ()=>{
+	let occupancy = new BitBoard(0b00000000000000000000000000000000,0b00100000000001100010000000000000);
+	let mask      = new BitBoard(0b01101000001000001000000010000000,0b00000100000000000010001000000000);
+	let expected  = new BitBoard(0,78);
+
+	expect(occupancy.mult(mask).shift_right(54)).toEqual(expected);
 })

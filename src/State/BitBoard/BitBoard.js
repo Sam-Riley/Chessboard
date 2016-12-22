@@ -14,25 +14,15 @@ export default class BitBoard{
 		return parseInt(str, 2);
 	}
 
-	/*
-	*/
-	kara32(x, y){
-		let xh = x >>> 16;
-		let xl = x & 0xffff;
-
-		let yh = y >>> 16;
-		let yl = y & 0xffff;
-
-		return {high: x, low: y, carry: 0};
-
-	}
-
 	print(){
 		return BitBoard.bin2Str(this.high).match(/.{1,8}/g).join("\n")
 				+"\n"+
 				BitBoard.bin2Str(this.low).match(/.{1,8}/g).join("\n")
 	}
 
+	isZero(){
+		return (this.high===0 && this.low===0);
+	}
 
 	isBitSet(bit){
 		if(bit > 31)
@@ -45,9 +35,9 @@ export default class BitBoard{
 		if(bit < 0 || bit > 63) return new BitBoard(this.high, this.low);
 		
 		if(bit > 31)
-			return new BitBoard((this.high|((1 << (bit-32)) >>> 0)), this.low)
+			return new BitBoard((this.high >>> 0|((1 << (bit-32)) >>> 0)), this.low)
 		else
-			return new BitBoard(this.high, (this.low | ((1 << (bit-32)) >>> 0)))
+			return new BitBoard(this.high, (this.low >>> 0 | ((1 << (bit-32)) >>> 0)))
 	}
 
 	getBit(bit){
@@ -81,13 +71,17 @@ export default class BitBoard{
 
 	}
 
-	getBitsSet(){
+	getSetBits(){
 		let bits = [];
 		for(var i = 0; i < 64; ++i)
 			if(this.isBitSet(i))
 				bits.push(i);
 
 		return bits;
+	}
+
+	getBitCount(){
+		return this.getSetBits().length;
 	}
 
 	plus(bitBoard){
@@ -108,28 +102,29 @@ export default class BitBoard{
 
 	mult(bitBoard){
 		let product = new BitBoard(0,0);
-		/*
-			lets start small here (multiply)
-
-			1001 = 9
-			0011 = 3
-			____
-
-		   01001 = 9   bit index = 0 left shifts = 0
-		   10010 = 18  bit index = 1 left shifts = 1
-		   _____
-
-		   11011 = 27
-		*/
-
-		let setBits = this.getBitsSet();
+		let setBits = this.getSetBits();
 		for(var i = 0; i < setBits.length; ++i){
 			let shifted = bitBoard.shift_left(setBits[i]);
 			product = product.plus(shifted);
 		}
-
 		return product;
+	}
 
+	//return 1 if bitBoard is greater
+	//return 0 if they are the same
+	//return -1 if bitBoard is less
+	compare(bitBoard){
+		if(bitBoard.high < this.high)
+			return -1;
+		else if(bitBoard.high > this.high)
+			return 1;
+		else
+			if(bitBoard.low < this.low)
+				return -1;
+			else if(bitBoard.high > this.high)
+				return 1;
+			else
+				return 0;
 	}
 
 	or(bitBoard){

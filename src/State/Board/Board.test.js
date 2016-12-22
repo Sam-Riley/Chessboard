@@ -68,3 +68,5 @@ it("Generates possible moves for a knight its starting position", ()=>{
 	let knight = new BitBoard(0,2);
 	expect(board.generateKnightMoves(knight, new BitBoard(0,0), knight, 1).print()).toEqual(new BitBoard(0,329728).print())
 })
+
+
