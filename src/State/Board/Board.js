@@ -318,30 +318,75 @@ export default class Board {
 	}
 
 	getMoves(){
-		return this.rookMagicMoves;
+		return this.generateMoveDB();
 	}
 
-	//get rook variations down first
 	generateOccupancyVariations(){
 		for(let bit=0; bit<=63; ++bit){
 			let mask = rookOccupancyMask[bit];
-			let setBitsInMask = mask.getSetBits();
-			let numOfVariations = (1 << setBitsInMask.length) >>> 0;
+			let setBits = rookOccupancyMask[bit].getSetBits();
+			let variationCount = (1 << setBits.length) >>> 0;
 
-			for(let i = 0; i < numOfVariations; i++){
-				let variation = new BitBoard(0,0);
+			for(let i=0; i<variationCount; ++i){
+				let move = new BitBoard(0,0);
 				let bitsInIndex = new BitBoard(0,i).getSetBits();
-				for(var j=0; j < bitsInIndex.length; ++j)
-					variation = variation.setBit(setBitsInMask[bitsInIndex[j]])
 
-				if(!Array.isArray(this.rookOccupancyVariations[bit]))
+				for(let j=0; j<bitsInIndex.length; j++)
+					move = move.setBit(setBits[bitsInIndex[j]]);
+
+				while(!Array.isArray(this.rookOccupancyVariations[bit]))
 					this.rookOccupancyVariations.push([]);
 
-				this.rookOccupancyVariations[bit][i] = variation
+				this.rookOccupancyVariations[bit][i]=move;
 			}
 		}
+		this.generateMoveDB();
 	}
 
+	generateMoveDB(){
+		for(let bit=0; bit<=63; ++bit){
+			let bitMask = rookOccupancyMask[bit];
+			let bitCount = bitMask.getBitCount();
+			let variationCount = (1<<bitCount) >>> 0;
+
+			for(let i=0; i<variationCount; ++i){
+				let move = new BitBoard(0,0);
+				let mask = this.rookOccupancyVariations[bit][i]
+				let magicIndex = mask.mult(magicNumberRook[bit]).shift_right(rookShift[bit]);
+
+				for(let bit=21+8; bit<=63; bit+=8){
+					move = move.setBit(bit);
+					if(mask.isBitSet(bit))
+						break;
+				}
+
+				for(let bit=21-8; bit>=0; bit-=8){
+					move = move.setBit(bit);
+					if(mask.isBitSet(bit))
+						break;
+				}
+
+				for(let bit=22; bit%8; ++bit){
+					move = move.setBit(bit);
+					if(mask.isBitSet(bit))
+						break
+				}
+
+				for(let bit=20; bit%7!=8 && bit>=0; --bit){
+					move = move.setBit(bit);
+					if(mask.isBitSet(bit))
+						break
+				}
+
+				while(!Array.isArray(this.rookMagicMoves[bit]))
+					this.rookMagicMoves.push([]);
+
+				this.rookMagicMoves[bit][magicIndex.low] = move;
+			}
+		}
+
+		return this.rookMagicMoves;
+	}
 
 	getAllPieces(){
 		let boards = [...this.whiteBitBoards, ...this.blackBitBoards];
@@ -383,6 +428,13 @@ export default class Board {
 		return -1;
 	}
 
+	/*
+		@param allyPieces  : a BitBoard of all places occupied by a particular pawns side
+		@param enemyPieces : a BitBoard of all places occupied by a particular pawns enemy side
+		@param allyPawns   : a BitBoard of all places occupied by friendly pawns
+
+		@returns : a BitBoard containing all places that the pawn can move to
+	*/
 	generatePawnMoves(allyPieces, enemyPieces, allyPawns, pawnIndex){
 		let allPieces = allyPieces.or(enemyPieces);
 		let pawn = allyPawns.and(new BitBoard(0,0).setBit(pawnIndex));
@@ -396,7 +448,7 @@ export default class Board {
 
 		return singlePush.or(doublePush).or(validTargets);
 	}
-
+	
 	generateKnightMoves(allyPieces, enemyPieces, allyKnights, knightIndex){
 		let allPieces = allyPieces.or(enemyPieces);
 		let knight = allyKnights.and(new BitBoard(0,0).setBit(knightIndex));
@@ -409,11 +461,21 @@ export default class Board {
 		return topMoves.or(leftMoves).or(bottomMoves).or(rightMoves).and(allyPieces.not());
 	}
 
-	generateRookMoves(allyPieces, enemyPieces, allyRooks, rookIndex){
+	generateRookMoves(allyPieces, enemyPieces, rookIndex){
 		let allPieces = allyPieces.or(enemyPieces);
-		let mask = rookOccupancyMask[rookIndex];
-		let occupancy = allPieces.and(mask);
+		let occupancy = allPieces.and(rookOccupancyMask[rookIndex]);
 		let magicIndex = occupancy.mult(magicNumberRook[rookIndex]).shift_right(rookShift[rookIndex]);
-		return this.rookMagicMoves[rookIndex][magicIndex];
+		return this.rookMagicMoves[rookIndex][magicIndex.low].and(allyPieces.not());
 	}
 }
+
+
+
+
+
+
+
+
+/*
+	1010000100000111100000000001000000100010000001000000000000000000
+*/

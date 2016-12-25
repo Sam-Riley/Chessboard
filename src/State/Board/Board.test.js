@@ -69,4 +69,10 @@ it("Generates possible moves for a knight its starting position", ()=>{
 	expect(board.generateKnightMoves(knight, new BitBoard(0,0), knight, 1).print()).toEqual(new BitBoard(0,329728).print())
 })
 
+it("Generates possible moves for a rook at C3 with a given board state", ()=>{
+	let allies = new BitBoard(0,2485346316);
+	let enemies = new BitBoard(2701623312,570687488);
+	let rookIndex = 21;
 
+	expect(board.generateRookMoves(allies, enemies, rookIndex).print()).toEqual("00000000\n00000000\n00000000\n00000000\n00100000\n11011100\n00000000\n00000000");
+})
