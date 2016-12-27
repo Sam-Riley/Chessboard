@@ -344,48 +344,46 @@ export default class Board {
 	}
 
 	generateMoveDB(){
-		for(let bit=0; bit<=63; ++bit){
-			let bitMask = rookOccupancyMask[bit];
+		for(let bitRef=0; bitRef<=63; ++bitRef){
+			let bitMask = rookOccupancyMask[bitRef];
 			let bitCount = bitMask.getBitCount();
 			let variationCount = (1<<bitCount) >>> 0;
 
 			for(let i=0; i<variationCount; ++i){
 				let move = new BitBoard(0,0);
-				let mask = this.rookOccupancyVariations[bit][i]
-				let magicIndex = mask.mult(magicNumberRook[bit]).shift_right(rookShift[bit]);
+				let mask = this.rookOccupancyVariations[bitRef][i]
+				let magicIndex = mask.mult(magicNumberRook[bitRef]).shift_right(rookShift[bitRef]);
 
-				for(let bit=21+8; bit<=63; bit+=8){
+				for(let bit=bitRef; bit<=63; bit+=8){
 					move = move.setBit(bit);
 					if(mask.isBitSet(bit))
 						break;
 				}
 
-				for(let bit=21-8; bit>=0; bit-=8){
+				for(let bit=bitRef; bit>=0; bit-=8){
 					move = move.setBit(bit);
 					if(mask.isBitSet(bit))
 						break;
 				}
 
-				for(let bit=22; bit%8; ++bit){
+				for(let bit=bitRef; bit%8; ++bit){
 					move = move.setBit(bit);
 					if(mask.isBitSet(bit))
 						break
 				}
 
-				for(let bit=20; bit%7!=8 && bit>=0; --bit){
+				for(let bit=bitRef; bit%7!=8 && bit>=0; --bit){
 					move = move.setBit(bit);
 					if(mask.isBitSet(bit))
 						break
 				}
 
-				while(!Array.isArray(this.rookMagicMoves[bit]))
+				while(!Array.isArray(this.rookMagicMoves[bitRef]))
 					this.rookMagicMoves.push([]);
 
-				this.rookMagicMoves[bit][magicIndex.low] = move;
+				this.rookMagicMoves[bitRef][magicIndex.low] = move;
 			}
 		}
-
-		return this.rookMagicMoves;
 	}
 
 	getAllPieces(){
